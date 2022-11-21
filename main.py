@@ -2,6 +2,8 @@ from fastapi import Path, Depends, APIRouter, HTTPException
 from pydantic import BaseModel, Field, constr
 from typing import Any
 from dao.daonetwork import get_utilisateur_dao
+from dao.daonetwork import get_all_utilisateur_dao
+
 
 from fastapi import FastAPI
 
@@ -19,6 +21,7 @@ def valid_utilisateur_from_path(
         )
     return found_utilisateur
 
+
 class UtilisateurModel(BaseModel):
     id: int = Field(ge=1, description="identifiant de l'utilisateur", example=1)
     nom: constr(strip_whitespace=True, min_length=1, max_length=255) = Field(description="Nom de l'utilisateur", example="Patrick Timsit")
@@ -31,3 +34,8 @@ def get_utilisateur(
     utilisateur = Depends(valid_utilisateur_from_path)
 ):
     return utilisateur
+
+@app.get("/utilisateurs", response_model=UtilisateurModel, summary="Afficher tous les utilisateur")
+def get_all_utilisateur():
+    utilisateurs = get_all_utilisateur_dao()
+    return utilisateurs
