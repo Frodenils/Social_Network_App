@@ -4,20 +4,20 @@ USE social_network;
 DROP TABLE IF EXISTS publication;
 DROP TABLE IF EXISTS utilisateur;
 
-CREATE TABLE utilisateur(
-    id SERIAL NOT NULL,
+CREATE OR REPLACE TABLE utilisateur(
+    id_utilisateur SERIAL NOT NULL,
     nom VARCHAR(255) NOT NULL,
     mail VARCHAR(255) NOT NULL,
     motdepasse VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id_utilisateur)
 );
 
-CREATE TABLE publication(
-    id SERIAL NOT NULL,
+CREATE OR REPLACE TABLE publication(
+    id_publication SERIAL NOT NULL,
     titre VARCHAR(255),
     img VARCHAR(255),
     contenu VARCHAR(255),
     id_utilisateur INTEGER NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id)
+    PRIMARY KEY (id_publication),
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
