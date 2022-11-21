@@ -1,6 +1,13 @@
 from psycopg2.extras import RealDictCursor
 
-from dao import connection
+from psycopg2 import connect
+def connection():
+    cnx = connect(
+        user = "root",
+        password = "root",
+        host = "localhost",
+        port = ""
+    )
 
 
 
