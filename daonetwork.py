@@ -1,6 +1,16 @@
 from psycopg2.extras import RealDictCursor
 
-from api.dao import connection
+from psycopg2 import connect
+
+def connection():
+    cnx = connect(
+        user="postgres",
+        password="postgres",
+        host="localhost",
+        port=5432,
+        database="social_network",
+    )
+    return cnx
 
 
 
