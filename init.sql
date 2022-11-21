@@ -17,7 +17,7 @@ CREATE OR REPLACE TABLE publication(
     titre VARCHAR(255),
     img VARCHAR(255),
     contenu VARCHAR(255),
-    id_utilisateur INTEGER NOT NULL,
+    id_utilisateur BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (id_publication),
     FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
