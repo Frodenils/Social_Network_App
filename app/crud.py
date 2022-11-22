@@ -4,20 +4,28 @@ from . import models, schemas
 
 
 def get_utilisateur(db: Session, utilisateur_id: int):
-    return db.query(models.utilisateur).filter(models.utilisateur.id == utilisateur_id).first()
+    return db.query(models.Utilisateur).filter(models.Utilisateur.id_utilisateur == utilisateur_id).first()
 
 
 def get_utilisateur_by_email(db: Session, email: str):
-    return db.query(models.utilisateur).filter(models.utilisateur.email == email).first()
+    return db.query(models.Utilisateur).filter(models.Utilisateur.email == email).first()
 
 
 def get_utilisateurs(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.utilisateur).offset(skip).limit(limit).all()
+    return db.query(models.Utilisateur).offset(skip).limit(limit).all()
 
 
 def create_utilisateur(db: Session, utilisateur: schemas.UtilisateurCreate):
-    fake_hashed_password = utilisateur.password + "notreallyhashed"
-    db_utilisateur = models.utilisateur(email=utilisateur.email, hashed_password=fake_hashed_password)
+    motdepasse = utilisateur.motdepasse + "notreallyhashed"
+    db_utilisateur = models.Utilisateur(nom=utilisateur.nom, email=utilisateur.email, motdepasse=motdepasse)
+    db.add(db_utilisateur)
+    db.commit()
+    db.refresh(db_utilisateur)
+    return db_utilisateur
+
+def edit_utilisateur(db: Session, utilisateur: schemas.UtilisateurEdit):
+    fake_hashed_password = utilisateur.password + "notreallyhased"
+    db_utilisateur = models.Utilisateur(email=utilisateur.email, hashed_password=fake_hashed_password)
     db.add(db_utilisateur)
     db.commit()
     db.refresh(db_utilisateur)
