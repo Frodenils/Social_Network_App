@@ -35,5 +35,9 @@ class UtilisateurCreate(BaseModel):
     email: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptimsit@yahoo.fr")
     motdepasse: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptforever1234")
 
+
 class UtilisateurEdit(BaseModel):
-    id_utilisateur: int
+    nom: str = Field(strip_whitespace=True, description="Nom de l'utilisateur",example="Patrique Timsit")
+    email: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptimsit@yahoo.fr")
+    motdepasse: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptforever1234")
+    publications: List[PublicationModel] = []
