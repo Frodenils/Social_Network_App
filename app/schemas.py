@@ -1,38 +1,39 @@
 from typing import List, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from . import models
 
 
-class PublicationBase(BaseModel):
-    titre: str
-    description: Union[str, None] = None
+class PublicationModel(BaseModel):
+    id_publication: int = Field(ge=1, description="L'identifiant de la publication",example=1)
+    titre: str = Field(strip_whitespace=True, description="Titre de la publication",example="La météo en charente maritime")
+    contenu: str = Field(strip_whitespace=True, description="Contenu de la publication",example="Lorem Ipsum dolor sit amet")
+    img: str = Field(strip_whitespace=True, description="Une image lié à la publication")
+    id_utilisateur: int = Field(ge=1, description="L'identifiant de l'utilisateur lié à la publication", example=1)
+
+class PublicationCreate(BaseModel):
+    titre: str = Field(strip_whitespace=True, description="Titre de la publication",example="La météo en charente maritime")
+    contenu: str = Field(strip_whitespace=True, description="Contenu de la publication",example="Lorem Ipsum dolor sit amet")
+    img: str = Field(strip_whitespace=True, description="Une image lié à la publication")
+    id_utilisateur: int = Field(ge=1, description="L'identifiant de l'utilisateur lié à la publication", example=1)
 
 
-class PublicationCreate(PublicationBase):
-    pass
-
-
-class Publication(PublicationBase):
-    id: int
-    owner_id: int
+class UtilisateurModel(BaseModel):
+    id_utilisateur: int = Field(ge=1, description="L'identifiant de l'utilisateur",example=1)
+    nom: str = Field(strip_whitespace=True, description="Nom de l'utilisateur",example="Patrique Timsit")
+    email: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptimsit@yahoo.fr")
+    motdepasse: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptforever1234")
+    publications: List[PublicationModel] = []
 
     class Config:
         orm_mode = True
 
 
-class UtilisateurBase(BaseModel):
-    email: str
+class UtilisateurCreate(BaseModel):
+    nom: str = Field(strip_whitespace=True, description="Nom de l'utilisateur",example="Patrique Timsit")
+    email: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptimsit@yahoo.fr")
+    motdepasse: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptforever1234")
 
-
-class UtilisateurCreate(UtilisateurBase):
-    password: str
-
-
-class Utilisateur(UtilisateurBase):
+class UtilisateurEdit(BaseModel):
     id_utilisateur: int
-    nom: str
-    mail: str
-    items: List[Publication] = []
-
-    class Config:
-        orm_mode = True
