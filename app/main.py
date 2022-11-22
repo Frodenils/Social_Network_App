@@ -53,3 +53,15 @@ def create_Publication_for_user(
 def read_Publications(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     Publications = crud.get_Publications(db, skip=skip, limit=limit)
     return Publications
+
+
+@app.delete("/utilisateur/delete/{user_id}")
+def read_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = crud.get_user(db, user_id=user_id)
+    with Session(engine) as session:
+        db_user = crud.get_user(db, user_id=user_id)
+        if not db_user:
+            raise HTTPException(status_code=404, detail="Utilisateur not found")
+        session.delete(db_user)
+        session.commit()
+        return {"ok": True}
