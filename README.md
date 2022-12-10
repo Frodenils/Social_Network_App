@@ -6,8 +6,8 @@ Avoir Python d'installé dans sa dernière version
 
 Lancez les commandes suivantes pour installer les packages nécessaires :
 ```
-    pip install sqlalchemy   
-    pip install uvicorn
+pip install sqlalchemy   
+pip install uvicorn
 ```
 
 ## Lancement de l'API
