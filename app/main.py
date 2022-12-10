@@ -33,7 +33,7 @@ def edit_utilisateur(id_utilisateur: int, utilisateur: schemas.UtilisateurEdit, 
     db_utilisateur = crud.get_utilisateur(db, id_utilisateur)
     if db_utilisateur is None :
         raise HTTPException(status_code=404, detail="Utilisateur inconnu")
-    return crud.edit_utilisateur(db, utilisateur)
+    return crud.edit_utilisateur(db, utilisateur, db_utilisateur, id_utilisateur)
 
 
 @app.get("/utilisateurs/", response_model=List[schemas.UtilisateurModel])

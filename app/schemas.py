@@ -40,4 +40,3 @@ class UtilisateurEdit(BaseModel):
     nom: str = Field(strip_whitespace=True, description="Nom de l'utilisateur",example="Patrique Timsit")
     email: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptimsit@yahoo.fr")
     motdepasse: str = Field(strip_whitespace=True, description="Email de l'utilisateur",example="ptforever1234")
-    publications: List[PublicationModel] = []

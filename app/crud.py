@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-
+from sqlalchemy import update
 from . import models, schemas
 
 
@@ -42,18 +42,23 @@ def create_utilisateur(
 
 def edit_utilisateur(
     db: Session,
-    utilisateur: schemas.UtilisateurEdit
+    utilisateur_model: schemas.UtilisateurEdit,
+    utilisateur,
+    id_utilisateur
 ):
-    motdepasse = utilisateur.motdepasse + "notreallyhased"
-    db_utilisateur = models.Utilisateur(
-        nom=utilisateur.nom,
-        email=utilisateur.email, 
-        motdepasse=motdepasse, 
-        publications=utilisateur.publications)
-    db.add(db_utilisateur)
+    motdepasse = utilisateur.motdepasse + "notreallyhashed"
+    db.execute(
+        update(models.Utilisateur)
+        .where(utilisateur.id_utilisateur == id_utilisateur)
+        .values(
+            nom=utilisateur_model.nom, 
+            email=utilisateur_model.email, 
+            motdepasse=motdepasse
+        )
+    )
     db.commit()
-    db.refresh(db_utilisateur)
-    return db_utilisateur
+    db.refresh(utilisateur)
+    return utilisateur
 
 
 def get_publications(
