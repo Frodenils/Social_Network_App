@@ -6,6 +6,8 @@ Avoir Python d'installé dans sa dernière version
 
 Lancez les commandes suivantes pour installer les packages nécessaires :
 ```
+pip install fastapi
+pip install fastapi-login
 pip install sqlalchemy   
 pip install uvicorn
 ```
