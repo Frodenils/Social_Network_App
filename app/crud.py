@@ -103,6 +103,12 @@ def edit_publication(
     id_publication: int,
     publication
 ):
+    publication = get_publication(
+        db = db, 
+        id_publication = id_publication
+    )
+    if publication is None :
+        raise HTTPException(status_code=404, detail=f"La publication d'identifiant !r{id_publication} n'a pas été trouvé")
     db.execute(
         update(models.Publication)
         .where(publication.id_publication == id_publication)
