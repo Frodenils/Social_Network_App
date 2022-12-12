@@ -2,6 +2,7 @@ from typing import List, Union
 
 from pydantic import BaseModel, Field
 
+
 from . import models
 
 
@@ -20,8 +21,12 @@ class PublicationCreate(ORMModel):
     titre: str = Field(strip_whitespace=True, description="Titre de la publication",example="La météo en charente maritime")
     contenu: str = Field(strip_whitespace=True, description="Contenu de la publication",example="Lorem Ipsum dolor sit amet")
     img: str = Field(strip_whitespace=True, description="Une image lié à la publication")
-    # id_utilisateur: int = Field(ge=1, description="L'identifiant de l'utilisateur lié à la publication", example=1)
 
+class PublicationEdit(ORMModel):
+    titre: str = Field(strip_whitespace=True, description="Titre de la publication",example="La météo en charente maritime")
+    contenu: str = Field(strip_whitespace=True, description="Contenu de la publication",example="Lorem Ipsum dolor sit amet")
+    img: str = Field(strip_whitespace=True, description="Une image lié à la publication")
+    id_utilisateur: int = Field(ge=1, description="L'identifiant de l'utilisateur lié à la publication", example=1)
 
 class UtilisateurModel(ORMModel):
     id_utilisateur: int = Field(ge=1, description="L'identifiant de l'utilisateur",example=1)

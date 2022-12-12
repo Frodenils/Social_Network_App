@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import update
+from fastapi import HTTPException
 from . import models, schemas
 
 
@@ -43,17 +44,19 @@ def create_utilisateur(
 
 def edit_utilisateur(
     db: Session,
-    utilisateur_model: schemas.UtilisateurEdit,
-    utilisateur,
-    id_utilisateur
+    EditUtilisateur: schemas.UtilisateurEdit,
+    id_utilisateur: int,
 ):
+    utilisateur = get_utilisateur(db, id_utilisateur)
+    if utilisateur is None :
+        raise HTTPException(status_code=404, detail="Utilisateur inconnu")
     motdepasse = utilisateur.motdepasse + "notreallyhashed"
     db.execute(
         update(models.Utilisateur)
         .where(utilisateur.id_utilisateur == id_utilisateur)
         .values(
-            nom=utilisateur_model.nom, 
-            email=utilisateur_model.email, 
+            nom=EditUtilisateur.nom, 
+            email=EditUtilisateur.email, 
             motdepasse=motdepasse
         )
     )
@@ -69,7 +72,7 @@ def get_publications(
 ):
     return db.query(models.Publication).offset(skip).limit(limit).all()
 
-def create_utilisateur_publications(
+def create_publications(
     db: Session, 
     CreatePublication: schemas.PublicationCreate, 
     id_utilisateur: int
@@ -85,3 +88,20 @@ def create_utilisateur_publications(
     db.commit()
     db.refresh(db_publication)
     return db_publication
+
+def edit_publication(
+    db: Session,
+    EditPublication: schemas.PublicationEdit,
+    id_publication: int,
+    publication
+):
+    db.execute(
+        update(models.Publication)
+        .where(publication.id_publication == id_publication)
+        .values(
+            titre = EditPublication.titre,
+            contenu = EditPublication.contenu,
+            img = EditPublication.img,
+            id_utilisateur = EditPublication.id_utilisateur
+        )
+    )

@@ -19,7 +19,6 @@ def get_db():
     finally:
         db.close()
 
-
 @app.post("/utilisateur/", response_model=schemas.UtilisateurModel, description="Crée un utilisateur")
 def create_utilisateur(
     CreateUtilisateur: schemas.UtilisateurCreate, 
@@ -37,16 +36,13 @@ def create_utilisateur(
 
 
 @app.put("/utilisateur/{id_utilisateur}", response_model=schemas.UtilisateurModel, description="Édite un utilisateur")
-def edit_utilisateur(id_utilisateur: int, utilisateur: schemas.UtilisateurEdit, db: Session = Depends(get_db)):
+def edit_utilisateur(id_utilisateur: int, EditUtilisateur: schemas.UtilisateurEdit, db: Session = Depends(get_db)):
     """
     # Edit utilisateur
 
     Édite un utilisateur
     """
-    db_utilisateur = crud.get_utilisateur(db, id_utilisateur)
-    if db_utilisateur is None :
-        raise HTTPException(status_code=404, detail="Utilisateur inconnu")
-    return crud.edit_utilisateur(db, utilisateur, db_utilisateur, id_utilisateur)
+    return crud.edit_utilisateur(db, EditUtilisateur, id_utilisateur)
 
 
 @app.get("/utilisateurs/", response_model=List[schemas.UtilisateurModel], description="Affiche la liste des utilisateurs")
@@ -72,24 +68,6 @@ def read_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Utilisateur not found")
     return db_user
     
-
-@app.post("/publication/{id_utilisateur}", response_model=schemas.PublicationModel, description="Crée une publication")
-def create_publication(
-    id_utilisateur: int,
-    CreatePublication: schemas.PublicationCreate,
-    db: Session = Depends(get_db)
-):
-    """
-    # Create Publication
-
-    Crée une publication
-    """
-    return crud.create_utilisateur_publications(
-        db = db, 
-        CreatePublication = CreatePublication, 
-        id_utilisateur = id_utilisateur
-    )
-
 @app.get("/publications/", response_model=List[schemas.PublicationModel], description="Affiche les publications")
 def read_publications(
     skip: int = 0, 
@@ -103,3 +81,33 @@ def read_publications(
     """
     publications = crud.get_publications(db, skip, limit)
     return publications
+
+@app.post("/publication/{id_utilisateur}", response_model=schemas.PublicationModel, description="Crée une publication")
+def post_publication(
+    id_utilisateur: int,
+    CreatePublication: schemas.PublicationCreate,
+    db: Session = Depends(get_db)
+):
+    """
+    # Post Publication
+
+    Crée une publication
+    """
+    return crud.create_utilisateur_publications(
+        db = db, 
+        CreatePublication = CreatePublication, 
+        id_utilisateur = id_utilisateur
+    )
+
+@app.put("/publication/{id_publication}", response_model=schemas.PublicationEdit, description="Édite une publication")
+def put_publication(
+    id_publication: int,
+    EditPublication: schemas.PublicationEdit,
+    db: Session = Depends(get_db),
+):
+    """
+    # Put Publication
+
+    Édite une publication
+    """
+    return crud.edit_publication(db = db, EditPublication = EditPublication, id_publication = id_publication)
