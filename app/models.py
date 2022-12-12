@@ -24,7 +24,6 @@ class Publication(Base):
     titre = Column(String, index=True)
     contenu = Column(String, index=True)
     img = Column(String)
-    # img = Column(image_attachment(""))
     id_utilisateur = Column(Integer, ForeignKey("Utilisateur.id_utilisateur"))
 
     utilisateur = relationship("Utilisateur", back_populates="publications")
