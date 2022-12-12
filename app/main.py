@@ -60,8 +60,23 @@ def create_publication_for_utilisateur(
 
 @app.get("/publications/", response_model=List[schemas.PublicationModel])
 def read_Publications(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    Publications = crud.get_Publications(db, skip=skip, limit=limit)
-    return Publications
+    """
+    # Get all publications
+    Afficher toutes les publications
+    """
+    publication = crud.get_Publications(db, skip=skip, limit=limit)
+    return publication
+
+@app.get("/publication/{id_publication}", response_model=schemas.PublicationModel)
+def read_publication(id_publication: int, db: Session = Depends(get_db)):
+    """
+    # Get one publication by id
+    Afficher une publication par son id
+    """
+    db_publication = crud.get_publication(db, id_publication)
+    if db_publication is None:
+        raise HTTPException(status_code=404, detail="Publication not found")
+    return db_publication
 
 
 @app.delete("/utilisateur/{id_utilisateur}")
@@ -71,5 +86,16 @@ def read_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
         if not db_utilisateur:
             raise HTTPException(status_code=404, detail="Utilisateur not found")
         session.delete(db_utilisateur)
+        session.commit()
+        return {"ok": True}
+
+
+@app.delete("/publication/{id_publication}")
+def id_publication(id_publication: int, db: Session = Depends(get_db)):
+    db_publication = crud.get_publication(db, id_publication)
+    with db as session:
+        if not db_publication:
+            raise HTTPException(status_code=404, detail="Publication not found")
+        session.delete(db_publication)
         session.commit()
         return {"ok": True}

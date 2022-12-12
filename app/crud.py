@@ -42,3 +42,9 @@ def create_utilisateur_item(db: Session, item: schemas.PublicationCreate, utilis
     db.commit()
     db.refresh(db_item)
     return db_item
+
+def get_publication(db: Session, publication_id: int):
+    return db.query(models.Publication).filter(models.Publication.id_publication == publication_id).first()
+
+def get_Publications(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Publication).offset(skip).limit(limit).all()
