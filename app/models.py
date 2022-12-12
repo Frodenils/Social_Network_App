@@ -9,6 +9,7 @@ from .database import Base
 class Utilisateur(Base):
     __tablename__ = "Utilisateur"
 
+    token = Column(String)
     id_utilisateur = Column(Integer, primary_key=True, index=True)
     nom = Column(String)
     email = Column(String, unique=True, index=True)

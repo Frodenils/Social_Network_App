@@ -65,6 +65,20 @@ def edit_utilisateur(
     return utilisateur
 
 
+def delete_utilisateur(
+    db = Session,
+    id_utilisateur = int
+):
+    utilisateur = get_utilisateur(
+        db = db, 
+        id_utilisateur = id_utilisateur
+    )
+    if utilisateur is None :
+        raise HTTPException(status_code=404, detail=f"L'utilisateur d'identifiant !r{id_utilisateur} n'a pas été trouvé")
+    db.delete(id_utilisateur)
+    db.commit()
+
+
 def get_publications(
     db: Session, 
     skip: int = 0, 
@@ -75,9 +89,9 @@ def get_publications(
 
 def get_publication(
     db: Session, 
-    publication_id: int
+    id_publication: int
 ):
-    return db.query(models.Publication).filter(models.Publication.id_publication == publication_id).first()
+    return db.query(models.Publication).filter(models.Publication.id_publication == id_publication).first()
 
 
 def create_publications(
@@ -87,9 +101,6 @@ def create_publications(
 ):
     db_publication = models.Publication(
         **CreatePublication.dict(),
-        # titre=CreatePublication.titre,
-        # contenu=CreatePublication.contenu,
-        # img=CreatePublication.img, 
         id_utilisateur = id_utilisateur
     )
     db.add(db_publication)
@@ -101,12 +112,8 @@ def edit_publication(
     db: Session,
     EditPublication: schemas.PublicationEdit,
     id_publication: int,
-    publication
 ):
-    publication = get_publication(
-        db = db, 
-        id_publication = id_publication
-    )
+    publication = get_publication(db = db, id_publication = id_publication)
     if publication is None :
         raise HTTPException(status_code=404, detail=f"La publication d'identifiant !r{id_publication} n'a pas été trouvé")
     db.execute(
@@ -119,3 +126,20 @@ def edit_publication(
             id_utilisateur = EditPublication.id_utilisateur
         )
     )
+    db.commit()
+    db.refresh(publication)
+    return publication
+
+
+def delete_publication(
+    db = Session,
+    id_publication = int
+):
+    publication = get_publication(
+        db = db, 
+        id_publication = id_publication
+    )
+    if publication is None :
+        raise HTTPException(status_code=404, detail=f"La publication d'identifiant !r{id_publication} n'a pas été trouvée")
+    db.delete(publication)
+    db.commit()
