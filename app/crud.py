@@ -27,13 +27,14 @@ def get_utilisateurs(
 
 def create_utilisateur(
     db: Session, 
-    utilisateur: schemas.UtilisateurCreate
+    CreateUtilisateur: schemas.UtilisateurCreate
 ):
-    motdepasse = utilisateur.motdepasse + "notreallyhashed"
+    motdepasse = CreateUtilisateur.motdepasse + "notreallyhashed"
     db_utilisateur = models.Utilisateur(
-        nom=utilisateur.nom, 
-        email=utilisateur.email, 
-        motdepasse=motdepasse)
+        nom=CreateUtilisateur.nom, 
+        email=CreateUtilisateur.email, 
+        motdepasse=motdepasse
+    )
     db.add(db_utilisateur)
     db.commit()
     db.refresh(db_utilisateur)
@@ -70,11 +71,17 @@ def get_publications(
 
 def create_utilisateur_publications(
     db: Session, 
-    item: schemas.PublicationCreate, 
-    utilisateur_id: int
+    CreatePublication: schemas.PublicationCreate, 
+    id_utilisateur: int
 ):
-    db_item = models.Publication(**item.dict(), owner_id=utilisateur_id)
-    db.add(db_item)
+    db_publication = models.Publication(
+        **CreatePublication.dict(),
+        # titre=CreatePublication.titre,
+        # contenu=CreatePublication.contenu,
+        # img=CreatePublication.img, 
+        id_utilisateur = id_utilisateur
+    )
+    db.add(db_publication)
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    db.refresh(db_publication)
+    return db_publication
