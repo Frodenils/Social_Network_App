@@ -72,6 +72,14 @@ def get_publications(
 ):
     return db.query(models.Publication).offset(skip).limit(limit).all()
 
+
+def get_publication(
+    db: Session, 
+    publication_id: int
+):
+    return db.query(models.Publication).filter(models.Publication.id_publication == publication_id).first()
+
+
 def create_publications(
     db: Session, 
     CreatePublication: schemas.PublicationCreate, 
