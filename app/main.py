@@ -119,7 +119,7 @@ def post_publication(
 
     Crée une publication
     """
-    return crud.create_utilisateur_publications(
+    return crud.create_publications(
         db = db, 
         CreatePublication = CreatePublication, 
         id_utilisateur = id_utilisateur
