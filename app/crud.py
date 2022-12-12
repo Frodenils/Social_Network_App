@@ -28,7 +28,7 @@ def get_utilisateurs(
 
 def create_utilisateur(
     db: Session, 
-    CreateUtilisateur: schemas.UtilisateurCreate
+    CreateUtilisateur: schemas.UtilisateurCreate,
 ):
     motdepasse = CreateUtilisateur.motdepasse + "notreallyhashed"
     db_utilisateur = models.Utilisateur(
@@ -65,12 +65,34 @@ def edit_utilisateur(
     return utilisateur
 
 
+def delete_utilisateur(
+    db = Session,
+    id_utilisateur = int
+):
+    utilisateur = get_utilisateur(
+        db = db, 
+        id_utilisateur = id_utilisateur
+    )
+    if utilisateur is None :
+        raise HTTPException(status_code=404, detail=f"L'utilisateur d'identifiant !r{id_utilisateur} n'a pas été trouvé")
+    db.delete(id_utilisateur)
+    db.commit()
+
+
 def get_publications(
     db: Session, 
     skip: int = 0, 
     limit: int = 100
 ):
     return db.query(models.Publication).offset(skip).limit(limit).all()
+
+
+def get_publication(
+    db: Session, 
+    id_publication: int
+):
+    return db.query(models.Publication).filter(models.Publication.id_publication == id_publication).first()
+
 
 def create_publications(
     db: Session, 
@@ -79,9 +101,6 @@ def create_publications(
 ):
     db_publication = models.Publication(
         **CreatePublication.dict(),
-        # titre=CreatePublication.titre,
-        # contenu=CreatePublication.contenu,
-        # img=CreatePublication.img, 
         id_utilisateur = id_utilisateur
     )
     db.add(db_publication)
@@ -89,29 +108,14 @@ def create_publications(
     db.refresh(db_publication)
     return db_publication
 
-
-def get_items(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Item).offset(skip).limit(limit).all()
-
-
-def create_utilisateur_item(db: Session, item: schemas.PublicationCreate, utilisateur_id: int):
-    db_item = models.Item(**item.dict(), owner_id=utilisateur_id)
-    db.add(db_item)
-    db.commit()
-    db.refresh(db_item)
-    return db_item
-
-def get_publication(db: Session, publication_id: int):
-    return db.query(models.Publication).filter(models.Publication.id_publication == publication_id).first()
-
-def get_publications(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Publication).offset(skip).limit(limit).all()
 def edit_publication(
     db: Session,
     EditPublication: schemas.PublicationEdit,
     id_publication: int,
-    publication
 ):
+    publication = get_publication(db = db, id_publication = id_publication)
+    if publication is None :
+        raise HTTPException(status_code=404, detail=f"La publication d'identifiant !r{id_publication} n'a pas été trouvé")
     db.execute(
         update(models.Publication)
         .where(publication.id_publication == id_publication)
@@ -122,3 +126,20 @@ def edit_publication(
             id_utilisateur = EditPublication.id_utilisateur
         )
     )
+    db.commit()
+    db.refresh(publication)
+    return publication
+
+
+def delete_publication(
+    db = Session,
+    id_publication = int
+):
+    publication = get_publication(
+        db = db, 
+        id_publication = id_publication
+    )
+    if publication is None :
+        raise HTTPException(status_code=404, detail=f"La publication d'identifiant !r{id_publication} n'a pas été trouvée")
+    db.delete(publication)
+    db.commit()

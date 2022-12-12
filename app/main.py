@@ -1,7 +1,11 @@
 from typing import List
 
+from fastapi_login import LoginManager
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi_login.exceptions import InvalidCredentialsException
 from sqlalchemy.orm import Session
+from sqlalchemy import update
 
 from . import crud, models, schemas
 from .database import SessionLocal, engine
@@ -9,6 +13,11 @@ from .database import SessionLocal, engine
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+
+SECRET = "e8da7c60fdf17dd0ae5e6e6802f6faf569de0d04c368b151"
+manager = LoginManager(SECRET, '/login')
+
 
 
 # Dependency
@@ -19,40 +28,68 @@ def get_db():
     finally:
         db.close()
 
+app = FastAPI()
 
-@app.get("/utilisateurs/", response_model=List[schemas.UtilisateurModel], description="Affiche la liste des utilisateurs")
-def read_utilisateurs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+
+@app.post('/login')
+def login(
+    data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    """
+    # Login
+    Crée un token de connexion. Celui-ci est inutile pour le bon fonctionnement de l'API, mais il a le mérite d'exister
+    """
+    email = data.username
+    password = data.password
+
+    utilisateur = crud.get_utilisateur_by_email(db, email)
+    if not utilisateur:
+        raise InvalidCredentialsException
+    elif password != utilisateur.motdepasse:
+        raise InvalidCredentialsException
+
+    print(utilisateur)
+
+    access_token = manager.create_access_token(
+        data={'sub': email}
+    )
+    return {'access_token': access_token}
+
+
+@app.get("/utilisateurs/", response_model=List[schemas.UtilisateurModel])
+def read_utilisateurs(
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db)
+):
     """
     # Read Utilisateurs
-
-    Affiche la liste de tous les utilisateurs
+    Affiche la liste de tous les **utilisateurs**
     """
     utilisateur = crud.get_utilisateurs(db, skip=skip, limit=limit)
     return utilisateur
 
 
-@app.get("/utilisateur/{id_utilisateur}", response_model=schemas.UtilisateurModel, description="Affiche un utilisateur")
+@app.get("/utilisateur/{id_utilisateur}", response_model=schemas.UtilisateurModel)
 def read_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
     """
-    # Get Utilisateur
-
-    Affiche l'**utilisateur** dont l'identifiant est donné en paramètre.
+    # Read Utilisateur
+    Affiche un utilisateur
     """
     db_user = crud.get_utilisateur(db, id_utilisateur)
     if db_user is None:
         raise HTTPException(status_code=404, detail="Utilisateur not found")
     return db_user
 
-
-@app.post("/utilisateur/", response_model=schemas.UtilisateurModel, description="Crée un utilisateur")
+@app.post("/utilisateur/", response_model=schemas.UtilisateurModel)
 def create_utilisateur(
     CreateUtilisateur: schemas.UtilisateurCreate, 
     db: Session = Depends(get_db)
 ):
     """
     # Create Utilisateur
-
-    Crée un utilisateur
+    Crée un **utilisateur**
     """
     db_utilisateur = crud.get_utilisateur_by_email(db, email=CreateUtilisateur.email)
     if db_utilisateur:
@@ -60,47 +97,42 @@ def create_utilisateur(
     return crud.create_utilisateur(db, CreateUtilisateur)
 
 
-@app.put("/utilisateur/{id_utilisateur}", response_model=schemas.UtilisateurModel, description="Édite un utilisateur")
+@app.put("/utilisateur/{id_utilisateur}", response_model=schemas.UtilisateurModel)
 def edit_utilisateur(id_utilisateur: int, EditUtilisateur: schemas.UtilisateurEdit, db: Session = Depends(get_db)):
     """
     # Edit utilisateur
-
-    Édite un utilisateur
+    Édite un **utilisateur**
     """
     return crud.edit_utilisateur(db, EditUtilisateur, id_utilisateur)
 
 
 @app.delete("/utilisateur/{id_utilisateur}")
-def read_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
-    db_utilisateur = crud.get_utilisateur(db, id_utilisateur)
-    with db as session:
-        if not db_utilisateur:
-            raise HTTPException(status_code=404, detail="Utilisateur not found")
-        session.delete(db_utilisateur)
-        session.commit()
-        return {"ok": True}
+def del_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
+    """
+    # Del Utilisateur
+    Supprimer un utilisateur
+    """
+    crud.delete_utilisateur(
+        db = db,
+        id_utilisateur = id_utilisateur
+    )
 
-    
-@app.get("/publications/", response_model=List[schemas.PublicationModel], description="Affiche les publications")
-def read_publications(
-    skip: int = 0, 
-    limit: int = 100, 
-    db: Session = Depends(get_db)
-):
+
+@app.get("/publications/", response_model=List[schemas.PublicationModel])
+def read_publications(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
-    # Read Publications
-    
-    Affiche toutes les publications
+    # Read Publication
+    Affiche toutes les **publications**
     """
-    publications = crud.get_publications(db, skip, limit)
-    return publications
+    publication = crud.get_publications(db, skip=skip, limit=limit)
+    return publication
 
 
 @app.get("/publication/{id_publication}", response_model=schemas.PublicationModel)
 def read_publication(id_publication: int, db: Session = Depends(get_db)):
     """
-    # Get one publication by id
-    Afficher une publication par son id
+    # Read Publication
+    Afficher une **publication** par son id
     """
     db_publication = crud.get_publication(db, id_publication)
     if db_publication is None:
@@ -108,7 +140,19 @@ def read_publication(id_publication: int, db: Session = Depends(get_db)):
     return db_publication
 
 
-@app.post("/publication/{id_utilisateur}", response_model=schemas.PublicationModel, description="Crée une publication")
+@app.delete("/publication/{id_publication}")
+def del_publication(id_publication: int, db: Session = Depends(get_db)):
+    """
+    # Del Publication
+    Supprime une publication
+    """
+    crud.delete_publication(
+        db = db,
+        id_publication = id_publication
+    )
+
+        
+@app.post("/publication/{id_utilisateur}", response_model=schemas.PublicationModel)
 def post_publication(
     id_utilisateur: int,
     CreatePublication: schemas.PublicationCreate,
@@ -116,7 +160,6 @@ def post_publication(
 ):
     """
     # Post Publication
-
     Crée une publication
     """
     return crud.create_publications(
@@ -125,7 +168,7 @@ def post_publication(
         id_utilisateur = id_utilisateur
     )
 
-@app.put("/publication/{id_publication}", response_model=schemas.PublicationEdit, description="Édite une publication")
+@app.put("/publication/{id_publication}", response_model=schemas.PublicationEdit)
 def put_publication(
     id_publication: int,
     EditPublication: schemas.PublicationEdit,
@@ -133,19 +176,6 @@ def put_publication(
 ):
     """
     # Put Publication
-
     Édite une publication
     """
     return crud.edit_publication(db = db, EditPublication = EditPublication, id_publication = id_publication)
-
-
-@app.delete("/publication/{id_publication}")
-def id_publication(id_publication: int, db: Session = Depends(get_db)):
-    db_publication = crud.get_publication(db, id_publication)
-    with db as session:
-        if not db_publication:
-            raise HTTPException(status_code=404, detail="Publication not found")
-        session.delete(db_publication)
-        session.commit()
-        return {"ok": True}
-    
