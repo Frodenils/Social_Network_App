@@ -28,7 +28,7 @@ def get_utilisateurs(
 
 def create_utilisateur(
     db: Session, 
-    CreateUtilisateur: schemas.UtilisateurCreate
+    CreateUtilisateur: schemas.UtilisateurCreate,
 ):
     motdepasse = CreateUtilisateur.motdepasse + "notreallyhashed"
     db_utilisateur = models.Utilisateur(

@@ -36,6 +36,11 @@ def login(
     data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
+    """
+    # Login
+
+    Crée un token de connexion. Celui-ci est inutile pour le bon fonctionnement de l'API, mais il a le mérite d'exister
+    """
     email = data.username
     password = data.password
 
@@ -50,29 +55,15 @@ def login(
     access_token = manager.create_access_token(
         data={'sub': email}
     )
-
-    db.execute(
-        update(models.Utilisateur)
-        .where(utilisateur.email == email)
-        .values(
-            token = access_token,
-            nom = utilisateur.nom,
-            email = utilisateur.email,
-            motdepasse = utilisateur.motdepasse,
-        )
-    )
-    db.commit()
-    db.refresh(utilisateur)
     return {'access_token': access_token}
 
 
-@app.get('/protected')
-def protected_route(user=Depends(manager)):
-    return {'user': user}
-
-
-@app.get("/utilisateurs/", response_model=List[schemas.UtilisateurModel], description="Affiche la liste des utilisateurs")
-def read_utilisateurs(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+@app.get("/utilisateurs/", response_model=List[schemas.UtilisateurModel])
+def read_utilisateurs(
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db)
+):
     """
     # Read Utilisateurs
 
@@ -81,8 +72,8 @@ def read_utilisateurs(skip: int = 0, limit: int = 100, db: Session = Depends(get
     utilisateur = crud.get_utilisateurs(db, skip=skip, limit=limit)
     return utilisateur
 
-@manager.user_loader()  
-@app.get("/utilisateur/{id_utilisateur}", response_model=schemas.UtilisateurModel, description="Affiche un utilisateur")
+
+@app.get("/utilisateur/{id_utilisateur}", response_model=schemas.UtilisateurModel)
 def read_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
     """
     # Read Utilisateur
@@ -94,7 +85,7 @@ def read_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Utilisateur not found")
     return db_user
 
-@app.post("/utilisateur/", response_model=schemas.UtilisateurModel, description="Crée un utilisateur")
+@app.post("/utilisateur/", response_model=schemas.UtilisateurModel)
 def create_utilisateur(
     CreateUtilisateur: schemas.UtilisateurCreate, 
     db: Session = Depends(get_db)
@@ -110,7 +101,7 @@ def create_utilisateur(
     return crud.create_utilisateur(db, CreateUtilisateur)
 
 
-@app.put("/utilisateur/{id_utilisateur}", response_model=schemas.UtilisateurModel, description="Édite un utilisateur")
+@app.put("/utilisateur/{id_utilisateur}", response_model=schemas.UtilisateurModel)
 def edit_utilisateur(id_utilisateur: int, EditUtilisateur: schemas.UtilisateurEdit, db: Session = Depends(get_db)):
     """
     # Edit utilisateur
@@ -120,7 +111,7 @@ def edit_utilisateur(id_utilisateur: int, EditUtilisateur: schemas.UtilisateurEd
     return crud.edit_utilisateur(db, EditUtilisateur, id_utilisateur)
 
 
-@app.delete("/utilisateur/{id_utilisateur}", description="Supprime un utilisateur")
+@app.delete("/utilisateur/{id_utilisateur}")
 def del_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
     """
     # Del Utilisateur
@@ -133,7 +124,7 @@ def del_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
     )
 
 
-@app.get("/publications/", response_model=List[schemas.PublicationModel], description="Affiche toutes les publications")
+@app.get("/publications/", response_model=List[schemas.PublicationModel])
 def read_publications(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     # Read Publication
@@ -144,7 +135,7 @@ def read_publications(skip: int = 0, limit: int = 100, db: Session = Depends(get
     return publication
 
 
-@app.get("/publication/{id_publication}", response_model=schemas.PublicationModel, description="Affiche une publication")
+@app.get("/publication/{id_publication}", response_model=schemas.PublicationModel)
 def read_publication(id_publication: int, db: Session = Depends(get_db)):
     """
     # Read Publication
@@ -157,7 +148,7 @@ def read_publication(id_publication: int, db: Session = Depends(get_db)):
     return db_publication
 
 
-@app.delete("/publication/{id_publication}", description="Supprime une publication")
+@app.delete("/publication/{id_publication}")
 def del_publication(id_publication: int, db: Session = Depends(get_db)):
     """
     # Del Publication
@@ -170,7 +161,7 @@ def del_publication(id_publication: int, db: Session = Depends(get_db)):
     )
 
         
-@app.post("/publication/{id_utilisateur}", response_model=schemas.PublicationModel, description="Crée une publication")
+@app.post("/publication/{id_utilisateur}", response_model=schemas.PublicationModel)
 def post_publication(
     id_utilisateur: int,
     CreatePublication: schemas.PublicationCreate,
@@ -187,7 +178,7 @@ def post_publication(
         id_utilisateur = id_utilisateur
     )
 
-@app.put("/publication/{id_publication}", response_model=schemas.PublicationEdit, description="Édite une publication")
+@app.put("/publication/{id_publication}", response_model=schemas.PublicationEdit)
 def put_publication(
     id_publication: int,
     EditPublication: schemas.PublicationEdit,
